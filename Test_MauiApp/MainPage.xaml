@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Test_MauiApp.MainPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:Test_MauiApp.Controls"
+    xmlns:converters="clr-namespace:Test_MauiApp.Converters"
+    xmlns:local="clr-namespace:Test_MauiApp.Models"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:vm="clr-namespace:Test_MauiApp.ViewModels"
+    x:Name="Page"
+    x:DataType="vm:MainPageViewModel"
+    Style="{StaticResource PageBackground}">
+    <Shell.TitleView>
+        <StackLayout VerticalOptions="CenterAndExpand">
+            <Label Style="{StaticResource PageTitleLabel}" Text="Top Movies" />
+        </StackLayout>
+    </Shell.TitleView>
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:PosterUrlConverter x:Key="PosterUrlConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior Command="{Binding Source={x:Reference Page}, Path=BindingContext.AppearingCommand}" EventName="Appearing" />
+    </ContentPage.Behaviors>
+    <Grid>
+        <CollectionView
+            Margin="10"
+            ItemsSource="{Binding Movies}"
+            RemainingItemsThreshold="1"
+            RemainingItemsThresholdReachedCommand="{Binding RemainingItemsThresholdReachedCommand}"
+            SelectionChangedCommand="{Binding RemainingItemsThresholdReachedCommand}"
+            SelectionMode="Single">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="local:Movie">
+                    <Frame Style="{StaticResource CardFrame}">
+                        <StackLayout Orientation="Horizontal" Spacing="10">
+                            <Image
+                                Aspect="AspectFill"
+                                HeightRequest="150"
+                                Source="{Binding PosterPath, Converter={StaticResource PosterUrlConverter}}"
+                                WidthRequest="100" />
+                            <StackLayout VerticalOptions="Center">
+                                <Label Style="{StaticResource MovieTitleLabel}" Text="{Binding Title}" />
+                                <Label Style="{StaticResource MovieReleaseDateLabel}" Text="{Binding ReleaseDate, StringFormat='{0:MM/dd/yyyy}'}" />
+                                <Label Style="{StaticResource MovieOverviewLabel}" Text="{Binding Overview}" />
+                                <Label Style="{StaticResource RatingLabel}" Text="Rating" />
+                                <controls:StarRating Rating="{Binding VoteAverage}" />
+                            </StackLayout>
+                        </StackLayout>
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=OptionSelectedCommand}" CommandParameter="{Binding .}" />
+                        </Frame.GestureRecognizers>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Image
+            BackgroundColor="Black"
+            HorizontalOptions="FillAndExpand"
+            IsVisible="{Binding IsBusy}"
+            Opacity="0.3"
+            VerticalOptions="FillAndExpand" />
+
+        <ActivityIndicator
+            HeightRequest="80"
+            IsRunning="{Binding IsBusy}"
+            IsVisible="{Binding IsBusy}"
+            WidthRequest="80"
+            Color="{StaticResource PrimaryText}" />
+    </Grid>
+</ContentPage>
